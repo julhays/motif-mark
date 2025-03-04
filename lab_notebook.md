@@ -28,7 +28,18 @@ I will test my script with the following command:
 ./motif-mark-oop.py -f Figure_1.fasta -m Fig_1_motifs.txt
 ```
 
+I am now going to go through the assignment directions to ensure I meet the requirements. I have documented further changes below:
+* I changed the name of my python script from ```motifs.py``` to ```motif-mark-oop.py```.
+* I changed the name of the output .png to match the prefix of the fasta input.
+
+
+
+
+
+
+
+
 Here is the output for the sample files provided in the assignment:
-![alt text](motif_drawing.png)
+![alt text](Figure_1.png)
 
 

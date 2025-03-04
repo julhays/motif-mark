@@ -95,6 +95,9 @@ args = get_args()
 fasta_file: str = args.fasta
 motif_file: str = args.motifs
 
+#get file path prefix for output name
+output = fasta_file.split('.')[0]
+
 
 #read in motifs and append to a list
 motif_list = []
@@ -297,4 +300,4 @@ for motif in color_map:
     legend_start += section
 
 #write out drawing
-surface.write_to_png("motif_drawing.png", )
+surface.write_to_png(f'{output}.png', )

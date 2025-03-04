@@ -7,7 +7,7 @@ Assignment goal: Write a python script using object-oriented code to visualize m
 
 File directory:
 * ```lab_notebook.md``` -> details of the process to complete this assignment for the sake of reproducibility
-* ```motif_drawing.png``` -> example graphical output of the script given the provided test files
+* ```Figure_1.png``` -> example graphical output of the script given the provided test files, ```Figure_1.fasta``` and ```Fig_1_motifs.txt```
 * ```motif-mark-oop.py``` -> script to make the drawing. Input is a fasta file of sequences and text file of motifs. Output is a png drawing
 
 To run this script, use the following command in the command line:
@@ -17,4 +17,4 @@ To run this script, use the following command in the command line:
 
 Here is a sample of what the graphical output of this script looks like:
 
-![alt text](motif_drawing.png)
+![alt text](Figure_1.png)
