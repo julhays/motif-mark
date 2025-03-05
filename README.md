@@ -5,6 +5,9 @@
 
 Assignment goal: Write a python script using object-oriented code to visualize motifs on sequences. The input is a .fasta file of sequences and a .txt file list of motifs. The output is a graphic illustration of each sequence overlaid with the found motifs.
 
+The script is capable of handling:
+* 
+
 File directory:
 * ```lab_notebook.md``` -> details of the process to complete this assignment for the sake of reproducibility
 * ```Figure_1.png``` -> example graphical output of the script given the provided test files, ```Figure_1.fasta``` and ```Fig_1_motifs.txt```

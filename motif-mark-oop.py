@@ -65,12 +65,23 @@ def convert_motif(motif):
     '''Converts a motif from the motif list into the regex searchable version, accounting for Y's being any pyrimadine.
     Inputs a single motif sequence, returns the regex searchable string of that motif.'''
     regex_dict = {'A': 'A', 
-                  'T': 'T',
+                  'T': '[T|U]',
                   'C': 'C',
                   'G': 'G',
-                  'U': 'T',
+                  'U': '[T|U]',
                   'Y': '[C|T|U]',
+                  'R': '[A|G]',
+                  'W': '[A|T|U]',
+                  'S': '[C|G]',
+                  'M': '[C|A]',
+                  'K': '[G|T|U]',
+                  'B': '[C|T|U|G]',
+                  'D': '[A|T|U|G]',
+                  'H': '[A|T|U|C]',
+                  'V': '[A|G|C]',
+                  'N': '[A|T|U|C|G]',
                  }
+
     motif = motif.upper()
     regex_motif = ""
     for char in motif:
@@ -260,19 +271,19 @@ context.move_to(seq_start_x, curr_y-50)
 context.show_text("Legend")
 
 #establish start x and section increments based on how many motifs there are
-section = width/(len(color_map)+3) #+3 was so the final motif didn't run over the border
+section = width/(len(color_map)+2)
 legend_start = seq_start_x
 
 #draw black box for the exon label key
 context.set_line_width(40)
 context.move_to(legend_start,curr_y)
-context.line_to(legend_start+40,curr_y)
+context.line_to(legend_start+20,curr_y)
 context.stroke()
 
 #write exon label
-context.set_font_size(20)
+context.set_font_size(18)
 context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL) 
-context.move_to(legend_start+45, curr_y+5) 
+context.move_to(legend_start+25, curr_y+5) 
 context.show_text("Exon") 
 
 #increment x position
@@ -286,14 +297,14 @@ for motif in color_map:
     context.set_source_rgba(red, green, blue, .6)
     context.set_line_width(40)
     context.move_to(legend_start,curr_y)
-    context.line_to(legend_start+40,curr_y)
+    context.line_to(legend_start+20,curr_y)
     context.stroke()
     
     #add motif label next to color block key
     context.set_source_rgb(0, 0, 0)
-    context.set_font_size(20)
+    context.set_font_size(18)
     context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL) 
-    context.move_to(legend_start+46, curr_y+6) 
+    context.move_to(legend_start+25, curr_y+6) 
     context.show_text(motif) 
     
     #increment x position
