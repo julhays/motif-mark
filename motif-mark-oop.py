@@ -8,36 +8,109 @@
 import argparse
 import re
 import cairo
+import random
 
 #Define classes
 class Gene:
     '''This class represents a record in a FASTA file. It will create Motif and Exon objects.'''
-    def __init__(self, header, sequence):
+    def __init__(self, header, sequence, motif_list):
         
         ## Data ##
-        self.name = header
-        self.sequence = sequence
-        self.upper_seq = sequence.upper()
-        self.length = len(sequence)
-        self.motifs = []
-        self.exons = []
+        self.header = header #stores fasta record header
+        self.title = self.parse_title()
+        self.sequence = sequence #sequence
+        self.upper_seq = sequence.upper() #all caps version of sequence
+        self.length = len(sequence) #sequence length
+        self.motifs = self.find_motifs(motif_list) #list of associated motif objects
+        self.exons = self.find_exons() #list of associated exon objects
         
     ## Methods ##
+    def parse_title(self):
+        gene_name = re.findall('>([A-Z0-9]+)', self.header)[0]
+        chromosome = re.findall('chr([0-9]+)', self.header)[0]
+        position = re.findall(':([0-9]+-[0-9]+)', self.header)[0]
+
+        new_title = f'Gene: {gene_name}, Chromosome: {chromosome}, Nucleotide Position: {position}'
+        return new_title
+
     def find_motifs(self, motif_list):
         '''Finds all instances of each motif in the motif list file and creates a Motif object for each. Stores in 
         motifs list for the associated Gene object.'''
+        #create list to store motif objects
+        motif_objects = []
+
+        #go through each motif in inputted .txt list
         for motif in motif_list:
-            regex_motif = convert_motif(motif)
+
+            #convert the motif into regex searchable string
+            regex_motif = self.convert_motif(motif)
+
+            #search for matches in the sequence
             for match in re.finditer(regex_motif, self.upper_seq):
+
+                #initialize a new motif object for each match
                 motif_object = Motif(motif, match.start(), len(match.group(1)))
-                self.motifs.append(motif_object)
+
+                #append object to list of objects
+                motif_objects.append(motif_object)
+        
+        return motif_objects #returns list of associated motif objects
                 
+
     def find_exons(self):
         '''Finds all instances of exons in the gene sequence file and creates an Exon object for each. Stores in 
         exon list for the associated Gene object.'''
+        #create list to store exon objects
+        exon_objects = []
+
+        #regex for all caps areas in the string
         for match in re.finditer("[A-Z]+", self.sequence):
+
+            #initialize a new exon object for each match
             exon_object = Exon(match.start(), len(match.group()))
-            self.exons.append(exon_object)
+
+            #append object to list of objects
+            exon_objects.append(exon_object)
+
+        return exon_objects #returns list of associated motif objects
+    
+    def convert_motif(self, motif):
+        '''Converts a motif from the motif list into the regex searchable version, accounting for Y's being any pyrimadine.
+        Inputs a single motif sequence, returns the regex searchable string of that motif.'''
+
+        #define a dictionary that converts each "wildcard" character into a regex searchable form
+        regex_dict = {'A': 'A', 
+                    'T': '[T|U]',
+                    'C': 'C',
+                    'G': 'G',
+                    'U': '[T|U]',
+                    'Y': '[C|T|U]',
+                    'R': '[A|G]',
+                    'W': '[A|T|U]',
+                    'S': '[C|G]',
+                    'M': '[C|A]',
+                    'K': '[G|T|U]',
+                    'B': '[C|T|U|G]',
+                    'D': '[A|T|U|G]',
+                    'H': '[A|T|U|C]',
+                    'V': '[A|G|C]',
+                    'N': '[A|T|U|C|G]',
+                    }
+
+        #make the motif uppercase
+        motif = motif.upper()
+
+        #make an empty string to build the regex searchable string
+        regex_motif = ""
+
+        #go through each character in the motif
+        for char in motif:
+
+            #add regex searchable form to regex string
+            regex_motif += regex_dict[char]
+
+        #returns the regex searchable version of the string
+        return "(?=(" + regex_motif + "))" #?= allows for characters to not be consumed to overlaps can be accounted for
 
 
 class Motif:
@@ -60,37 +133,7 @@ class Exon:
         self.length = length      
 
 
-#Define necessary functions
-def convert_motif(motif):
-    '''Converts a motif from the motif list into the regex searchable version, accounting for Y's being any pyrimadine.
-    Inputs a single motif sequence, returns the regex searchable string of that motif.'''
-    regex_dict = {'A': 'A', 
-                  'T': '[T|U]',
-                  'C': 'C',
-                  'G': 'G',
-                  'U': '[T|U]',
-                  'Y': '[C|T|U]',
-                  'R': '[A|G]',
-                  'W': '[A|T|U]',
-                  'S': '[C|G]',
-                  'M': '[C|A]',
-                  'K': '[G|T|U]',
-                  'B': '[C|T|U|G]',
-                  'D': '[A|T|U|G]',
-                  'H': '[A|T|U|C]',
-                  'V': '[A|G|C]',
-                  'N': '[A|T|U|C|G]',
-                 }
-
-    motif = motif.upper()
-    regex_motif = ""
-    for char in motif:
-        regex_motif += regex_dict[char]
-        
-    return "(?=(" + regex_motif + "))"
-
-
-# MAIN SCRIPT BODY
+##### MAIN SCRIPT BODY #####
 #argparse
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create a visual of motifs on gene sequences")
@@ -100,7 +143,6 @@ def get_args() -> argparse.Namespace:
 
 #call get_args to create args object
 args = get_args()
-
 
 #set path variables and assign them to the user inputted values at the function call
 fasta_file: str = args.fasta
@@ -157,7 +199,7 @@ with open(fasta_file, "rt") as fh:
         #if encounter a new fasta record
         elif line[0] == '>':
             #make object out of previous record and append to list
-            new_gene = Gene(header, sequence)
+            new_gene = Gene(header, sequence, motif_list)
             gene_list.append(new_gene)
 
             #reset variables
@@ -172,17 +214,11 @@ with open(fasta_file, "rt") as fh:
             sequence += line
 
 #make object out of last record and append to list
-new_gene = Gene(header, sequence)
+new_gene = Gene(header, sequence, motif_list)
 gene_list.append(new_gene)
 
-#loop through each gene object to make corresponding motif and exon objects
-for record in gene_list:
-    record.find_motifs(motif_list)
-    record.find_exons()
 
-
-
-# Create the drawing
+# Create the drawing out of gene objects
 
 #count the number of genes and longest gene to establish drawing size
 longest = 0
@@ -226,8 +262,8 @@ for gene in gene_list:
     #plot sequence name over the sequence
     context.set_font_size(22)
     context.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL) 
-    context.move_to(seq_start_x, curr_y-50) 
-    context.show_text(gene.name) 
+    context.move_to(seq_start_x, curr_y-55) 
+    context.show_text(gene.title) 
 
     #plot the exons as thicker black regions overlaid on the sequence, introns are just the thinner regions
     for exon in gene.exons:
@@ -245,7 +281,7 @@ for gene in gene_list:
     #plot the motifs as colored regions overlaid on the sequences
     for motif in gene.motifs:
         red, green, blue = motif.color #set color based on which motif in the list it is
-        context.set_source_rgba(red, green, blue, .6) #.6 makes it translucent so you can see overlapping motifs
+        context.set_source_rgba(red, green, blue, .7) #.7 makes it translucent so you can see overlapping motifs
         context.set_line_width(40)
 
         #extract necessary info
@@ -253,8 +289,9 @@ for gene in gene_list:
         motif_length = motif.length
 
         #draw
-        context.move_to(seq_start_x+motif_start,curr_y)       
-        context.line_to(seq_start_x+motif_start+motif_length,curr_y)
+        stagger = random.randint(-20, 21)
+        context.move_to(seq_start_x+motif_start, curr_y + stagger)       
+        context.line_to(seq_start_x+motif_start+motif_length, curr_y + stagger)
         context.stroke()
     
     #increment y position by the set space between each sequence drawing
@@ -294,7 +331,7 @@ for motif in color_map:
 
     #make color block
     red, green, blue = color_map[motif]
-    context.set_source_rgba(red, green, blue, .6)
+    context.set_source_rgba(red, green, blue, .7)
     context.set_line_width(40)
     context.move_to(legend_start,curr_y)
     context.line_to(legend_start+20,curr_y)

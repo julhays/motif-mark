@@ -27,16 +27,20 @@ I will test my script with the following command:
 ```
 ./motif-mark-oop.py -f Figure_1.fasta -m Fig_1_motifs.txt
 ```
+The script takes 0.06 seconds to run.
 
 I am now going to go through the assignment directions to ensure I meet the requirements. I have documented further changes below:
 * I changed the name of my python script from ```motifs.py``` to ```motif-mark-oop.py```.
 * I changed the name of the output .png to match the prefix of the fasta input.
+* I adjusted my motif regex dictionary to account for all ambiguous nucleotides, not just Y's
 
+### 3/4/25
 
+I am updating my readme to be more detailed.
 
+Now, I will attempt the bonuses.
 
-
-
+I added a random stagger of motifs along the y-axis to better see overlaps. I also parsed the header of each fasta record to make a better figure title.
 
 
 Here is the output for the sample files provided in the assignment:
